@@ -1,0 +1,17 @@
+{
+  "source_url": "https://www.litija.si/DownloadFile?id=513027",
+  "source_file": "litija_bruto_bilanca.pdf",
+  "sha256": "812d44a635f10be6e02fe391b7acc2042b2e07ba26e2ec11c38e51da354196c7",
+  "pdftotext_version": "pdftotext version 4.06 [www.xpdfreader.com]",
+  "extraction_mode": "pdftotext -table",
+  "data_rows": 197,
+  "total_rows": 102,
+  "rows": 95,
+  "short_leaf_konti": [],
+  "notes": [
+    "post-closing TB: P&L konti closed via razred 8; FY2021 loss 71.374,38 debit on 933",
+    "class 99 = off-balance (izvenbilančno)",
+    "no konto names in source",
+    "totals rule (1-3 digit = total, 4+ digit = leaf) is specific to this Minimax export, verified by check (c)"
+  ]
+}

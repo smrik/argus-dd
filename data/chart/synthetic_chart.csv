@@ -1,0 +1,65 @@
+konto,name,aop,weight
+000,Dolgoročne premoženjske pravice,005,1.25
+001,Popravek vrednosti dolgoročnih premoženjskih pravic,005,-0.25
+020,Zemljišča,011,1
+021,Zgradbe,012,1.6
+031,Popravek vrednosti zgradb,012,-0.6
+040,Proizvajalne naprave in stroji,013,1.8
+050,Popravek vrednosti proizvajalnih naprav in strojev,013,-0.8
+041,Druga oprema in drobni inventar,014,2
+051,Popravek vrednosti druge opreme in drobnega inventarja,014,-1
+047,Oprema v gradnji ali izdelavi,016,1
+060,Delnice in deleži v družbah v skupini,021,1
+071,Dolgoročna posojila drugim,026,1
+090,Odložene terjatve za davek,031,1
+100,Denarna sredstva v blagajni,052,0.01
+110,Denarna sredstva na transakcijskih računih,052,0.99
+120,Kratkoročne terjatve do kupcev v državi,050,0.75
+121,Kratkoročne terjatve do kupcev v tujini,050,0.3
+129,Popravek vrednosti kratkoročnih terjatev do kupcev,050,-0.05
+160,Terjatve za vstopni DDV,051,0.8
+165,Druge kratkoročne terjatve,051,0.2
+180,Kratkoročna posojila drugim,047,1
+190,Kratkoročno odloženi stroški,053,1
+300,Material,035,1
+630,Proizvodi,037,1
+660,Trgovsko blago,038,1
+900,Osnovni kapital,058,1
+910,Kapitalske rezerve,060,1
+920,Zakonske rezerve,062,1
+930,Preneseni čisti dobiček ali izguba,068,1
+933,Čisti dobiček ali izguba poslovnega leta,070,1
+960,Rezervacije za odpravnine in jubilejne nagrade,073,1
+970,"Dolgoročna posojila, prejeta od bank",078,1
+975,Kratkoročni del dolgoročnih posojil bank,089,0.7
+275,"Kratkoročna posojila, prejeta od bank",089,0.3
+220,Kratkoročne obveznosti do dobaviteljev v državi,093,0.7
+221,Kratkoročne obveznosti do dobaviteljev v tujini,093,0.3
+250,Obveznosti do zaposlencev za plače,094,0.6
+260,Obveznosti za DDV,094,0.3
+265,Druge obveznosti do državnih institucij,094,0.1
+290,Vnaprej vračunani stroški,095,1
+400,Stroški materiala,131,1
+402,Stroški energije,132,1
+410,Stroški transportnih storitev,135,1
+412,Najemnine,136,1
+413,Povračila stroškov zaposlenim v zvezi z delom,137,1
+417,Stroški intelektualnih in osebnih storitev,138,0.6
+419,Drugi stroški storitev,138,0.4
+430,Amortizacija,145,1
+470,Plače zaposlencev,140,1
+471,Prispevki za pokojninsko in invalidsko zavarovanje,141,1
+472,Prispevki za druga socialna zavarovanja,142,1
+474,Drugi stroški dela,143,1
+480,Drugi stroški,150,1
+700,Nabavna vrednost prodanega blaga,129,1
+741,Odhodki za obresti od posojil bank,171,1
+750,Drugi odhodki,181,1
+760,Prihodki od prodaje storitev na domačem trgu,112,1
+761,Prihodki od prodaje storitev na trgu EU,116,1
+762,Prihodki od prodaje blaga na domačem trgu,114,1
+763,Prihodki od prodaje blaga na trgu EU,117,1
+768,Drugi poslovni prihodki,125,1
+777,Prihodki od obresti,165,1
+780,Drugi prihodki,180,1
+810,Davek iz dobička,184,1

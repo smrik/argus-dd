@@ -1,0 +1,11 @@
+{
+  "source_url": "https://www.ajpes.si/Doc/LP/Program/LPGD_2024_V1_6.xls",
+  "source_file": "LPGD_2024_V1_6.xls",
+  "sha256": "b568759ddac1a69726cb7961cf4860dbacc5317c50d742ed28e06a2d2a6f369a",
+  "rows": 177,
+  "leaves_per_total": {
+    "001": 38,
+    "055": 31,
+    "186": 50
+  }
+}

@@ -1,0 +1,93 @@
+[
+  {
+    "file": "slovenijavgibanju_bruto_bilanca_2020.pdf",
+    "url": "https://www.slovenijavgibanju.si/datoteke/bruto_bilanca_2020.pdf",
+    "sha256": "b7ac9fc63088d72a586a9b42d7b700ed1ca5fc81b58d8aeaaa5fe3ee8fb03206",
+    "bytes": 114192,
+    "note": "Analitika 1 software bruto bilanca export, s.p./company chart, FY2020. Same file also exposed at arhiv.sportna-unija.si, www.vetervlaseh.si, www.zdravjuprijaznaorganizacija.si (/datoteke/bruto_bilanca_2020.pdf)."
+  },
+  {
+    "file": "kocevje_priloga1_bruto_bilanca_2018.pdf",
+    "url": "https://www.kocevje.si/files/other/news/66/182962Priloga%201%20-%20Bruto%20bilanca.pdf",
+    "sha256": "206588053222084d777bf840c095fc3a51edf5ab7e08dbd4950feddb3d6d2e9a",
+    "bytes": 125726,
+    "note": "Municipality-published bruto bilanca (predizdelana), 2018, budget-user chart."
+  },
+  {
+    "file": "razvoj_podezelja_4_bilanca_2023.pdf",
+    "url": "https://razvoj-podezelja.si/images/02_pdf/15zbor/4_Bilanca_2023.pdf",
+    "sha256": "6b76178e4708c9c739d32d5236e994fe339e9d734269e1b9ccaa3123c6a6e2cb",
+    "bytes": 922130,
+    "note": "NGO (društvo) zbor assembly pack bilanca, 2023, društvo chart."
+  },
+  {
+    "file": "razvoj_podezelja_bruto_bilanca_drpsn_2023.pdf",
+    "url": "https://razvoj-podezelja.si/images/02_pdf/16zbor/03_bruto_bilanca_DRPSN_2023.pdf",
+    "sha256": "945079eeaf8f0d2448fd7eab18539159c6204ab82c3ba71d0c4a433b86b0de93",
+    "bytes": 861465,
+    "note": "NGO (društvo) bruto bilanca \"na dan 31.12.23\", konto-level, društvo chart."
+  },
+  {
+    "file": "litija_bruto_bilanca.pdf",
+    "url": "https://www.litija.si/DownloadFile?id=513027",
+    "sha256": "812d44a635f10be6e02fe391b7acc2042b2e07ba26e2ec11c38e51da354196c7",
+    "bytes": 38714,
+    "note": "Municipality (Občina Litija) \"Bruto bilanca\" file."
+  },
+  {
+    "file": "fotoklub_maribor_analiticna_bruto_bilanca_2019.pdf",
+    "url": "https://www.fotoklub-maribor.si/klub/wp-content/uploads/sites/2/2020/05/Analiti%C4%8Dna-bruto-bilanca-2019-1.pdf",
+    "sha256": "ab4817aa2395a87493a86fc3986a889e9e81365d90686f78ed5a6abb2808f6f8",
+    "bytes": 223969,
+    "note": "Club analytical bruto bilanca, 2019."
+  },
+  {
+    "file": "posvet_financno_porocilo_2025.pdf",
+    "url": "http://posvet.org/wp-content/uploads/2026/02/Financno-porocilo-2025.pdf",
+    "sha256": "7e8f11e3a8dbef201dc74fc3f7c77767a79812c2548675214bd99d979165c3f8",
+    "bytes": 61093,
+    "note": "Slovenian-language financial report incl. bruto bilanca (prihodki/odhodki)."
+  },
+  {
+    "file": "kamnik_velika_planina_pregled.pdf",
+    "url": "https://www.kamnik.si/DownloadFile?id=448234",
+    "sha256": "99a777c32817991e137f65c4f8dd4aa40e0c0dc0924c8c1c98e4d7251a9dea1a",
+    "bytes": 386062,
+    "note": "Municipal review of accounting information of company (družba Velika planina)."
+  },
+  {
+    "file": "piramida_gkw_frp_razkritje.pdf",
+    "url": "https://www.piramida-lj.si/media/uploads/documents/GKW-FRP_Financno%20razkritje%20podatkov.pdf",
+    "sha256": "c72ecab81f651f313cbaabb3919ec71a092d7db18ac67f6ff981ab7e8db7080d",
+    "bytes": 446668,
+    "note": "Piramida software sample \"Glavna knjiga\" FRP financial-disclosure export; layout reference."
+  },
+  {
+    "file": "ijs_glavna_knjiga_navodilo.pdf",
+    "url": "https://ijs.si/ijsw/IJSvision_Navodila_Uprava?action=AttachFile&do=get&target=Finance_1_Poglavje_5_Glavna_knjiga_1.2.pdf",
+    "sha256": "8041e0d752d5e732525acf944b83fd50e689db7bb3f12d94c036eded48ce2db7",
+    "bytes": 449194,
+    "note": "IJS (Institut Jožef Stefan) internal glavna knjiga instructions; layout reference."
+  },
+  {
+    "file": "seps_kontni_nacrt_gd.pdf",
+    "url": "https://seps.si/wp-content/uploads/2025/02/Kontni-nacrt-za-gospodarske-druzbe-1.pdf",
+    "sha256": "f5e00af14fbf45a749418a46543d62b521e533f8a4bc5c0fd6a8f24dffc42b05",
+    "bytes": 542042,
+    "note": "SEPS Priporočeni enotni kontni načrt za gospodarske družbe (company 3-digit chart); closes ajpes.md open item on official chart."
+  },
+  {
+    "file": "sirevizija_enotni_kontni_nacrt_2024.pdf",
+    "url": "https://si-revizija.si/datoteke/standardi/3280/enotni-kontnii-nacrt-2024.pdf",
+    "sha256": "3b1241ac2bcff2159b529f6d14428d0bf9e91fccc96c830ea2939a59a77aa64b",
+    "bytes": 320110,
+    "note": "Priporočeni enotni kontni načrt 2024 revision (si-revizija.si copy)."
+  },
+  {
+    "file": "uradni_list_srs2024_priloga1_kontni_nacrt.pdf",
+    "url": "https://www.uradni-list.si/files/RS_-2024-081-02384-OB~P001-0000.PDF",
+    "sha256": "f8c3d6f481d514c33833a64e016d463be0a1e4efe86ee6add8a92f5d3177739e",
+    "bytes": 478803,
+    "note": "Official ENOTNI KONTNI NAČRT, Priloga 1 to SRS 2024 (Uradni list RS 2024-81)."
+  }
+]
