@@ -13,6 +13,7 @@ from openpyxl import load_workbook
 from argus.layouts import write_all, write_erp_xlsx, write_export_csv, write_statements, write_tidy
 from argus.aop import AopTree
 from argus.synth import generate
+from argus.pdf import pdftotext
 
 FIELDS = ("opening", "debit", "credit", "closing")
 NUMBER = re.compile(r"-?\d[\d.]*,\d{2}")
@@ -33,15 +34,6 @@ def truth(path):
     with path.open(encoding="utf-8", newline="") as f:
         return [(int(r["year"]), r["konto"], r["name"], *(cents(r[k]) for k in FIELDS))
                 for r in csv.DictReader(f)]
-
-
-def pdftotext():
-    """xpdf 4.x pdftotext (has -table); poppler/TeX Live builds do not. Override with $PDFTOTEXT."""
-    tool = os.environ.get("PDFTOTEXT") or shutil.which("pdftotext")
-    if tool is None:
-        return None
-    help_text = subprocess.run([tool, "-h"], capture_output=True, encoding="utf-8", errors="replace")
-    return tool if "-table" in help_text.stdout + help_text.stderr else None
 
 
 def pdf_lines(path):

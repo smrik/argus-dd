@@ -10,6 +10,7 @@ dependencies = [
 
 [project.scripts]
 argus-synth = "argus.synth:main"
+argus-wrangle = "argus.wrangle:main"
 
 [dependency-groups]
 dev = ["pytest>=8.3"]
