@@ -27,7 +27,7 @@ def rendered(request, tmp_path_factory):
     out = tmp_path_factory.mktemp("pipeline")
     write_all(company, out)
     manifest = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
-    assert {e["format"] for e in manifest.values()} == {*FORMATS, "tidy"}
+    assert {e["format"] for e in manifest.values()} == {*FORMATS, "tidy", "numeric_konto_xlsx"}
     return company, out, manifest
 
 
@@ -73,6 +73,18 @@ def test_tidy_rollup_and_cent_variance(rendered):
         assert any(p.startswith("AOP 110:") for p in problems)
         assert any(p.startswith("AOP 112:") for p in problems)
         assert all(p.startswith("AOP ") and "diff" in p for p in problems)
+
+
+def test_numeric_konto_requires_judgement(rendered, tmp_path):
+    _, out, manifest = rendered
+    for name, entry in manifest.items():
+        if entry["format"] != "numeric_konto_xlsx":
+            continue
+        source = tmp_path / "input.xlsx"
+        shutil.copyfile(out / name, source)
+        result = wrangle(source)
+        assert result.format == "numeric_konto_xlsx"
+        assert any("konto stored as number" in p for p in result.problems)
 
 
 def test_longest_prefix_and_unknown():

@@ -1,11 +1,13 @@
 import csv
 import json
 import shutil
+from dataclasses import replace
 from time import perf_counter
 from decimal import Decimal
 from pathlib import Path
 
 import pytest
+from openpyxl import Workbook
 
 from argus.layouts import write_all
 from argus.pdf import pdftotext
@@ -206,6 +208,81 @@ def analitika_lines(tmp_path, body, header="Bruto bilanca - Analitika 1", period
     path.write_text("\n".join([header, period, "Konto Naziv", "Otvoritev Promet Saldo",
                                "DB KR DB KR DB KR", *body]), encoding="utf-8")
     return path.read_text(encoding="utf-8").splitlines()
+
+
+def test_numeric_konto_fixtures(rendered, tmp_path):
+    out, manifest = rendered
+    for name, entry in manifest.items():
+        if entry["format"] != "numeric_konto_xlsx":
+            continue
+        neutral = tmp_path / "input.xlsx"
+        shutil.copyfile(out / name, neutral)
+        result = wrangle(neutral)
+        expected = truth(out / entry["truth_file"])[entry["year"]]
+        assert result.format == "numeric_konto_xlsx"
+        assert result.rows == sorted([replace(r, konto=str(int(r.konto))) for r in expected],
+                                     key=lambda r: r.konto)
+        assert result.problems == [
+            "konto stored as number in Bruto bilanca: leading zeros may be lost "
+            "(e.g. 400 may be 0400); fix the export or map manually"]
+
+
+@pytest.mark.parametrize("code", [400, 400.5, "0400"])
+def test_konto_warning_follows_cell_type(tmp_path, code):
+    numeric = isinstance(code, (int, float))
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Sheet"
+    ws.append(["Bruto bilanca za leto 2021"])
+    ws.append(["Konto", "Naziv", "Otvoritev", "Promet D", "Promet K", "Saldo"])
+    ws.append([code, "Oprema", 0, 1, 1, 0])
+    ws.append([4001 if numeric else "04001", "Other", 0, 2, 2, 0])
+    path = tmp_path / "input.xlsx"
+    wb.save(path)
+    result = wrangle(path)
+    assert [r.konto for r in result.rows] == (["400", "4001"] if numeric else ["0400", "04001"])
+    assert len(result.problems) == int(numeric)
+    if numeric:
+        assert result.problems == ["konto stored as number in Sheet: leading zeros may be lost "
+                                   "(e.g. 400 may be 0400); fix the export or map manually"]
+
+
+@pytest.mark.parametrize("saldo", ["", "0,00 0,00"])
+def test_analitika_one_sided_and_zero_saldo(tmp_path, saldo):
+    result = read_pdf_lines(analitika_lines(tmp_path, [
+        "0030 Premozenjske pravice 0,00 0,00 972,34 0,00 972,34",
+        "003 PREMOZENJSKE PRAVICE 0,00 0,00 972,34 0,00 972,34",
+        "0080 Popravek 0,00 0,00 0,00 972,34 972,34",
+        f"120 Zero 1,00 0,00 0,00 1,00 {saldo}",
+        f"121 Other zero 0,00 1,00 1,00 0,00 {saldo}",
+        "SKUPAJ 1,00 1,00 973,34 973,34",
+    ]))[2021]
+    assert result.rows == [TbRow("0030", "Premozenjske pravice", 0, 97234, 0, 97234),
+                           TbRow("0080", "Popravek", 0, 0, 97234, -97234),
+                           TbRow("120", "Zero", 100, 0, 100, 0),
+                           TbRow("121", "Other zero", -100, 100, 0, 0)]
+    assert result.problems == []
+
+
+@pytest.mark.parametrize("amounts", ["0,00 0,00 1,00 0,00", "0,00 0,00 1,00 0,00 2,00",
+                                   "0,00 0,00 0,00 1,00 2,00"])
+def test_analitika_bad_printed_saldo(tmp_path, amounts):
+    result = read_pdf_lines(analitika_lines(tmp_path, [f"120 Bad {amounts}"]))[2021]
+    assert any("120: printed closing mismatch" in p for p in result.problems)
+
+
+def test_analitika_total_difference_and_wrapped_name(tmp_path):
+    result = read_pdf_lines(analitika_lines(tmp_path, [
+        "Razlika",
+        "0030 Wrapped 0,00 0,00 1,00 0,00 1,00", "name",
+        "003 TOTAL 0,00 0,00 1,00 0,00 1,00 1,00 D",
+        "0080 Other 0,00 0,00 0,00 1,00 1,00",
+        "008 TOTAL 0,00 0,00 0,00 1,00 1,00 1,00 K",
+        "SKUPAJ 0,00 0,00 1,00 1,00 1,00 1,00",
+    ]))[2021]
+    assert result.rows == [TbRow("0030", "Wrapped name", 0, 100, 0, 100),
+                           TbRow("0080", "Other", 0, 0, 100, -100)]
+    assert result.problems == []
 
 
 def test_pdf_grouping_spaces_are_complete_amounts(tmp_path):

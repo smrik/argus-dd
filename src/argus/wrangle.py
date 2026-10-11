@@ -294,6 +294,11 @@ def read_pdf_lines(lines):
             continue
         code, rest = match[1], line[match.end():]
         owner = None
+        # Analitika totals may also print a labelled net difference (Razlika).
+        if fmt == "analitika_pdf" and "Razlika" in text:
+            difference = re.search(NUMBER.pattern + r"\s+[DK]\s*$", rest)
+            if difference:
+                rest = rest[:difference.start()]
         amounts = list(NUMBER.finditer(rest))
         try:
             if not amounts:
@@ -322,6 +327,12 @@ def read_pdf_lines(lines):
                 problems.append(f"line {n}: {code}: printed closing mismatch")
             if code == "SKUPAJ" and v[6] - v[7] != closing:
                 problems.append(f"line {n}: SKUPAJ: closing mismatch")
+        elif fmt == "analitika_pdf" and len(v) in (4, 5):
+            net = v[0] - v[1] + v[2] - v[3]
+            saldo = v[4] if len(v) == 5 else 0
+            closing = saldo if net >= 0 else -saldo
+            if saldo != abs(net):
+                problems.append(f"line {n}: {code}: printed closing mismatch")
         else:
             if len(v) != 6:
                 problems.append(f"line {n}: {code}: wrong amount count")
@@ -338,11 +349,19 @@ def read_table(table, fmt, year, ref=""):
     printed, problems = [], []
     for n, cells in enumerate(table, 1):
         cells = list(cells)
+        numeric_code = bool(ref and cells and isinstance(cells[0], (int, float)))
+        if numeric_code:
+            cells[0] = str(int(cells[0]))
         label = str(cells[0] or "").strip() if cells else ""
         match = CODE.fullmatch(label)
         total = label.upper() == "SKUPAJ" or re.fullmatch(r"Skupaj razred \d+", label, re.I)
         if not match and not total:
             continue
+        if numeric_code:
+            warning = (f"konto stored as number in {ref}: leading zeros may be lost "
+                       "(e.g. 400 may be 0400); fix the export or map manually")
+            if warning not in problems:
+                problems.append(warning)
         line_ref = f"{ref}:{n}" if ref else n
         try:
             if fmt in ("quirky_xlsx", "erp"):
@@ -390,6 +409,9 @@ def wrangle_all(path):
                     fmt = "quirky_xlsx"
                 elif "Otvoritev" in text and "Breme" in text and "Končno stanje" in text:
                     fmt = "erp"
+                elif any(tuple(r[:6]) == ("Konto", "Naziv", "Otvoritev", "Promet D", "Promet K", "Saldo")
+                         for r in table):
+                    fmt = "numeric_konto_xlsx"
                 else:
                     raise ValueError("unknown workbook format")
                 year = year_of(text)
