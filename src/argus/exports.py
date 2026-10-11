@@ -12,6 +12,7 @@ import json
 import random
 import textwrap
 from dataclasses import replace
+from decimal import Decimal
 from itertools import groupby
 
 from openpyxl import Workbook
@@ -30,6 +31,7 @@ SOURCES = {
     "monthly_xlsx": "kamnik_velika_planina_pregled.pdf",
     "quirky_xlsx": "litija_bruto_bilanca.pdf",
     "tab_csv": "slovenijavgibanju_bruto_bilanca_2020.pdf",
+    "numeric_konto_xlsx": None,
 }
 
 
@@ -38,7 +40,7 @@ def ascii_text(text):
 
 
 def parts(amount, weights):
-    values = [round(amount * w / sum(weights)) for w in weights]
+    values = [round(Decimal(amount) * w / sum(weights)) for w in weights]
     main = max(range(len(weights)), key=weights.__getitem__)
     values[main] += amount - sum(values)
     return values
@@ -79,7 +81,7 @@ def gross(rows, minimax=False):
         values += [opening[0] + debit, opening[1] + credit]
         closing = sides(sum(r.closing for r in rows))
     values += list(closing)
-    return [eur_si(v) if not minimax or i < 6 or v else ""
+    return [eur_si(Decimal(v)) if not minimax or i < 6 or v else ""
             for i, v in enumerate(values)]
 
 
@@ -177,16 +179,22 @@ def analitika_pdf(company, y, path, rng):
     rows = [replace(r, name=ascii_text(r.name + (" - ureditev nepremicnin in poslovnih prostorov" if i % 7 == 0 else "")))
             for i, r in enumerate(analytic_rows(y.rows, rng))]
     lines = []
+
+    def amounts(members):
+        values = gross(members)[:4]
+        net = sum(r.opening + r.debit - r.credit for r in members)
+        return values + [eur_si(Decimal(v)) if v else "" for v in sides(net)]
+
     for konto, children in groupby(rows, key=lambda r: r.konto[:3]):
         children = list(children)
         for r in children:
             names = textwrap.wrap(r.name, width=55)
-            lines.append((r.konto, names[0], gross([r])))
+            lines.append((r.konto, names[0], amounts([r])))
             lines.extend(("", name, []) for name in names[1:])
-        lines.append((konto, ascii_text(children[0].name.split(" - ")[0]).upper()[:55], gross(children)))
-    lines.append(("SKUPAJ", "", gross(rows)))
+        lines.append((konto, ascii_text(children[0].name.split(" - ")[0]).upper()[:55], amounts(children)))
+    lines.append(("SKUPAJ", "", amounts(rows)))
     pdf(path, company, y.year, "analitika_pdf", lines)
-    return rows, ["3 digit totals after children", "wrapped names on amount-free lines", "DB/KR split"]
+    return rows, ["3 digit totals after children", "wrapped names on amount-free lines", "one-sided Saldo; blank when zero"]
 
 
 def furs_pdf(company, y, path, rng):
@@ -232,6 +240,21 @@ def monthly_xlsx(company, y, path, rng):
             cell.number_format = "#,##0.00"
     wb.save(path)
     return y.rows, ["months as columns", "monthly net movement", "gross debit/credit not recoverable; only net"]
+
+
+def numeric_konto_xlsx(company, y, path, rng):
+    """Imitate a generic Excel export that loses leading zeros in numeric konti."""
+    rows = analytic_rows(y.rows, rng)
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Bruto bilanca"
+    ws.append([company.name])
+    ws.append([f"Bruto bilanca za leto {y.year}"])
+    ws.append(["Konto", "Naziv", "Otvoritev", "Promet D", "Promet K", "Saldo"])
+    for r in rows:
+        ws.append([int(r.konto), r.name, *(Decimal(getattr(r, f)) / 100 for f in FIELDS)])
+    wb.save(path)
+    return rows, ["generic Excel export", "numeric konto cells lose leading zeros", "numeric amounts"]
 
 
 def quirky_xlsx(company, path):
@@ -302,7 +325,7 @@ def write_exports(company, out_dir):
                                [year for year, _ in years], "quirks": quirks, "truth_file": write_truth(path, years)}
 
     for y in company.years:
-        for renderer in (minimax_pdf, analitika_pdf, furs_pdf, monthly_xlsx, tab_csv):
+        for renderer in (minimax_pdf, analitika_pdf, furs_pdf, monthly_xlsx, numeric_konto_xlsx, tab_csv):
             fmt = renderer.__name__
             extension = fmt.rsplit("_", 1)[1]
             path = out_dir / f"tb_{y.year}_{fmt}.{extension}"

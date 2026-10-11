@@ -13,10 +13,12 @@ from openpyxl import load_workbook
 from argus.layouts import write_all, write_erp_xlsx, write_export_csv, write_statements, write_tidy
 from argus.aop import AopTree
 from argus.synth import generate
+from argus.pdf import pdftotext
 
 FIELDS = ("opening", "debit", "credit", "closing")
 NUMBER = re.compile(r"-?\d[\d.]*,\d{2}")
-FORMATS = ("minimax_pdf", "analitika_pdf", "furs_pdf", "monthly_xlsx", "quirky_xlsx", "tab_csv")
+FORMATS = ("minimax_pdf", "analitika_pdf", "furs_pdf", "monthly_xlsx", "quirky_xlsx", "tab_csv",
+           "numeric_konto_xlsx")
 
 
 def cents(value):
@@ -33,15 +35,6 @@ def truth(path):
     with path.open(encoding="utf-8", newline="") as f:
         return [(int(r["year"]), r["konto"], r["name"], *(cents(r[k]) for k in FIELDS))
                 for r in csv.DictReader(f)]
-
-
-def pdftotext():
-    """xpdf 4.x pdftotext (has -table); poppler/TeX Live builds do not. Override with $PDFTOTEXT."""
-    tool = os.environ.get("PDFTOTEXT") or shutil.which("pdftotext")
-    if tool is None:
-        return None
-    help_text = subprocess.run([tool, "-h"], capture_output=True, encoding="utf-8", errors="replace")
-    return tool if "-table" in help_text.stdout + help_text.stderr else None
 
 
 def pdf_lines(path):
@@ -87,13 +80,19 @@ def read_named_pdf(path, year, size):
             pending = None
             code = match[1]
             amounts = list(NUMBER.finditer(line[match.end():]))
-            assert len(amounts) == 6
+            assert len(amounts) in ((4, 5) if size == (4, 5) else (6,))
             if len(code) not in size or not code.isdigit():
                 continue
             rest = line[match.end():]
             name = " ".join(rest[:amounts[0].start()].split())
             v = [si(m[0]) for m in amounts]
-            pending = [year, code, name, v[0] - v[1], v[2], v[3], v[4] - v[5]]
+            net = v[0] - v[1] + v[2] - v[3]
+            if size == (4, 5):
+                assert v[4:] == ([abs(net)] if net else [])
+                closing = net
+            else:
+                closing = v[4] - v[5]
+            pending = [year, code, name, v[0] - v[1], v[2], v[3], closing]
             rows.append(pending)
         elif in_table and pending is not None and line.strip():
             assert not NUMBER.search(line)
@@ -136,6 +135,19 @@ def read_tab(path, year):
     return [(year, r[0], r[1], *(si(v) for v in r[2:])) for r in lines[2:-1]]
 
 
+def read_numeric_konto(path, year):
+    wb = load_workbook(path, data_only=True)
+    assert len(wb.worksheets) == 1
+    assert list(wb.active.values)[2] == ("Konto", "Naziv", "Otvoritev", "Promet D", "Promet K", "Saldo")
+    rows = []
+    for r in wb.active.iter_rows(min_row=4, values_only=True):
+        assert isinstance(r[0], int)
+        assert all(isinstance(v, (int, float)) for v in r[2:])
+        rows.append((year, str(r[0]), r[1], *(cents(v) for v in r[2:])))
+    wb.close()
+    return rows
+
+
 @pytest.fixture(scope="module", params=[("trading", 1), ("services", 7)])
 def rendered(request, tmp_path_factory):
     company = generate(*request.param)
@@ -163,11 +175,16 @@ def test_round_trip_and_rollup(rendered, fmt):
             actual = read_monthly(path, year)
         elif fmt == "quirky_xlsx":
             actual = read_quirky(path)
+        elif fmt == "numeric_konto_xlsx":
+            actual = read_numeric_konto(path, year)
         else:
             actual = read_tab(path, year)
         target = expected
         if fmt == "monthly_xlsx":
             target = [(y, k, n, o, d - c, cl) for y, k, n, o, d, c, cl in expected]
+        elif fmt == "numeric_konto_xlsx":
+            assert any(k.startswith("0") for _, k, *_ in expected)
+            target = [(y, str(int(k)), *rest) for y, k, *rest in expected]
         elif fmt == "furs_pdf":
             target = [r for r in expected if r[-1] != 0]
             hidden = [r for r in expected if not r[-1]]
@@ -217,7 +234,11 @@ def test_manifest_inventory(rendered):
         assert (out / name).is_file() and (out / entry["truth_file"]).is_file()
         assert entry["year"] and entry["quirks"]
         if entry["format"] in FORMATS:
-            assert entry["imitates"].endswith(".pdf")
+            if entry["format"] == "numeric_konto_xlsx":
+                assert entry["imitates"] is None
+                assert "generic Excel export" in entry["quirks"]
+            else:
+                assert entry["imitates"].endswith(".pdf")
 
 
 def workbook_values(path):
