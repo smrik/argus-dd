@@ -435,17 +435,46 @@ def wrangle(path):
 
 
 def main(argv=None):
+    from argus.aop import AopTree
+    from argus.chart import load_chart
+    from argus.checks import MEMO_AOPS, cross_check, load_filed
+    from argus.layouts import eur_si
+    from argus.mapping import rollup, statements_from_tb
+    from argus.tb import column
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("file")
     parser.add_argument("--out")
+    parser.add_argument("--map", action="store_true", help="roll up and map closing balances to AOP")
+    parser.add_argument("--filed", help="cross-check filed CSV (implies --map)")
     args = parser.parse_args(argv)
     results = wrangle_all(args.file)
+    problems = []
+    if args.map or args.filed:
+        chart, tree = load_chart(), AopTree.load()
     for year, result in results.items():
         print(f"{year}: {result.format}, rows={len(result.rows)}, dropped={len(result.dropped)}, net_only={result.net_only}")
         if result.net_only:
             print("NET ONLY: gross debit/credit not recoverable")
         for problem in result.problems:
             print(problem)
+        problems.extend(result.problems)
+        if args.map or args.filed:
+            rows, issues = rollup(result.rows, chart)
+            mapped = statements_from_tb(column(rows, "closing"), chart, tree)
+            for aop, label in (("001", "total assets"), ("110", "net sales"),
+                               ("186", "net profit"), ("187", "net loss")):
+                print(f"AOP {aop} {label}: {eur_si(Decimal(mapped[aop]))}")
+            if args.filed:
+                try:
+                    issues.extend(cross_check(mapped, load_filed(args.filed, year)))
+                except (ValueError, InvalidOperation) as e:
+                    issues.append(str(e))
+                print("Cross-check: problems" if issues else "Cross-check: OK")
+                print(f"Not checked (memo lines): {', '.join(sorted(MEMO_AOPS))}")
+            for problem in issues:
+                print(problem)
+            problems.extend(issues)
     if args.out:
         with open(args.out, "w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
@@ -453,7 +482,7 @@ def main(argv=None):
             for year, result in sorted(results.items()):
                 for r in result.rows:
                     writer.writerow([year, r.konto, r.name, *(format(Decimal(v) / 100, ".2f") for v in vector(r))])
-    return int(any(r.problems for r in results.values()))
+    return int(bool(problems))
 
 
 if __name__ == "__main__":

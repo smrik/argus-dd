@@ -42,8 +42,10 @@ Reference/layout files (not real-firm TBs): `kamnik_velika_planina_pregled.pdf`
 ## Official company chart — located (closes ajpes.md open item)
 
 - SEPS Priporočeni enotni kontni načrt za gospodarske družbe, samostojne podjetnike in kmetije: `seps_kontni_nacrt_gd.pdf` (seps.si, 2025) and 2024 revision `sirevizija_enotni_kontni_nacrt_2024.pdf` (si-revizija.si/datoteke/standardi/3280/).
-- Official annex: ENOTNI KONTNI NAČRT, Priloga 1 k SRS 2024, Uradni list RS št. 81/2024: `uradni_list_srs2024_priloga1_kontni_nacrt.pdf` (uradni-list.si/files/RS_-2024-081-02384-OB~P001-0000.PDF).
-- The chart in `data/chart/` is still synthetic; these files are the authoritative 3-digit company chart. Extract before replacing it.
+- CORRECTION (2026-10-11): `uradni_list_srs2024_priloga1_kontni_nacrt.pdf` (Uradni list RS 81/2024, uradni-list.si/files/RS_-2024-081-02384-OB~P001-0000.PDF) is the **budget-users chart** (proračun, proračunski uporabniki: "sredstva v upravljanju", 90 = splošni sklad), not the company chart. It matches the Kočevje TB, not d.o.o. TBs. Filename is misleading.
+- Company chart = SIR "Priporočeni enotni kontni načrt" (recommended, not binding): 2015 version `seps_kontni_nacrt_gd.pdf`, 2023 revision (adopted 15.11.2023) `sirevizija_enotni_kontni_nacrt_2024.pdf`. Column "Uporablja" marks applicability (D d.o.o./d.d., P s.p., Z zadruge, N neprofitne, DI društva). Matches Litija (90 vpoklicani kapital, 93 čisti poslovni izid, 80 poslovni izid).
+- Copyright: both SIR PDFs state SIR holds the rights; copying/distribution for commercial purposes without written permission is prohibited. Extracting the chart into the repo needs an owner decision (issue #5).
+- The chart in `data/chart/` is still synthetic.
 
 ## Where TBs are published (finding patterns)
 

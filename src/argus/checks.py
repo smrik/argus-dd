@@ -3,9 +3,46 @@
 Each check returns a list of problems; an empty list means it passed.
 """
 
+import csv
 from collections import Counter
+from decimal import Decimal
 
 from argus.mapping import RESULT_AOP
+
+
+def load_filed(path, year):
+    """Filed monetary AOP figures for one year, in integer cents (EUR decimals)."""
+    amounts = {}
+    with open(path, encoding="utf-8-sig", newline="") as f:
+        for row in csv.DictReader(f):
+            if int(row["year"]) != year or row["aop"] in {"188", "189"}:
+                continue
+            amount = Decimal(row["amount"]) * 100
+            if not amount.is_finite() or amount != amount.to_integral_value():
+                raise ValueError(f"AOP {row['aop']}: not a 2-decimal amount")
+            amounts[row["aop"]] = int(amount)
+    if not amounts:
+        raise ValueError(f"no filed monetary figures for {year}")
+    return amounts
+
+
+# "Od tega" memo lines (interest already included in II. and III.): a konto-level TB cannot split them out.
+MEMO_AOPS = frozenset({"154", "167"})
+
+
+def cross_check(mapped, filed, tolerance=0):
+    """Verify filed AOP lines a TB can produce (memo lines skipped); amounts in integer cents."""
+    from argus.layouts import eur_si
+
+    problems = []
+    for aop, amount in filed.items():
+        if aop in MEMO_AOPS:
+            continue
+        actual = mapped.get(aop, 0)
+        diff = actual - amount
+        if abs(diff) > tolerance:
+            problems.append(f"AOP {aop}: TB {eur_si(Decimal(actual))} vs filed {eur_si(Decimal(amount))} (diff {eur_si(Decimal(diff))})")
+    return problems
 
 
 def check_tb(rows):
